@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -42,6 +43,8 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTotalTransactionBlocks(ctx context
 // SuiGetTransactionBlock implements the method `sui_getTransactionBlock`, gets the transaction response object for a specified transaction digest.
 func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Context, req models.SuiGetTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
 	var rsp models.SuiTransactionBlockResponse
+	var prev_rsp models.SuiTransactionBlockPreviewResponse
+
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionBlock",
 		Params: []interface{}{
@@ -52,12 +55,20 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Conte
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+
+	err = json.Unmarshal(respBytes, &prev_rsp)
+
 	if err != nil {
-		return rsp, err
+		return rsp, nil
+	}
+
+	if prev_rsp.Error != "" {
+		return rsp, errors.New(prev_rsp.Error)
+	}
+
+	err = json.Unmarshal(prev_rsp.Result, &rsp)
+	if err != nil {
+		return rsp, nil
 	}
 	return rsp, nil
 }

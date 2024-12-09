@@ -188,6 +188,11 @@ type ModifiedAtVersions struct {
 	SequenceNumber string `json:"sequenceNumber"`
 }
 
+type SuiTransactionBlockPreviewResponse struct {
+	Error  string          `json:"error,omitempty"`
+	Result json.RawMessage `json:"result,omitempty"`
+}
+
 type SuiTransactionBlockResponse struct {
 	Digest                  string              `json:"digest"`
 	Transaction             SuiTransactionBlock `json:"transaction,omitempty"`
