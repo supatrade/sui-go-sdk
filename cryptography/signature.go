@@ -15,7 +15,7 @@ type SignaturePubkeyPair struct {
 	PubKey          []byte
 }
 
-func parseSerializedSignature(serializedSignature string) (*SignaturePubkeyPair, error) {
+func ParseSerializedSignature(serializedSignature string) (*SignaturePubkeyPair, error) {
 	if strings.EqualFold(serializedSignature, "") {
 		return nil, fmt.Errorf("multiSig is not supported")
 	}
